@@ -1,0 +1,115 @@
+# Modular RAG MCP Server - Configuration
+# This is the main configuration file for the MCP Server.
+# Edit this file to configure LLM, Embedding, VectorStore, and other services.
+
+# =============================================================================
+# LLM Configuration
+# =============================================================================
+llm:
+  provider: "openai"  # Options: openai, azure, ollama, deepseek
+  model: "gpt-4o"
+  base_url: "https://ai.soruxgpt.com/v1"  # OpenAI-compatible relay endpoint, e.g. https://your-relay/v1
+  deployment_name: ""
+  azure_endpoint: ""
+  api_version: ""
+  api_key: "sk-vvJjP737lfUU6204o89gayb1iDhobi5eUqItf1NjPjU52hrs"
+  temperature: 0.0
+  max_tokens: 4096
+
+# =============================================================================
+# Embedding Configuration
+# =============================================================================
+embedding:
+  provider: "openai"  # Options: openai, azure, ollama
+  model: "text-embedding-ada-002"
+  base_url: "https://ai.soruxgpt.com/v1"  # OpenAI-compatible relay endpoint, usually same as llm.base_url
+  dimensions: 1536  # text-embedding-ada-002 固定维度 (不传递给API, 仅用于验证)
+  # Azure-compatible settings (azure_endpoint triggers Azure compat mode):
+  azure_endpoint: ""
+  deployment_name: ""
+  api_version: ""
+  api_key: "sk-vvJjP737lfUU6204o89gayb1iDhobi5eUqItf1NjPjU52hrs"
+  # OpenAI-specific settings (if provider is openai):
+  # api_key: "YOUR_API_KEY_HERE"
+
+# =============================================================================
+# Vision LLM Configuration (for Image Captioning)
+# =============================================================================
+vision_llm:
+  enabled: true  # Set to true to enable vision capabilities
+  provider: "openai"  # Options: openai, azure, ollama
+  model: "gpt-4o"  # Options: gpt-4o, gpt-4-vision-preview (OpenAI), llava (Ollama)
+  base_url: "https://ai.soruxgpt.com/v1"  # OpenAI-compatible relay endpoint for vision model
+  # Azure-compatible settings (azure_endpoint triggers Azure compat mode):
+  azure_endpoint: ""
+  deployment_name: ""
+  api_version: ""
+  api_key: "sk-vvJjP737lfUU6204o89gayb1iDhobi5eUqItf1NjPjU52hrs"
+  # Ollama-specific settings (if provider is ollama):
+  # base_url: "http://localhost:11434"
+  max_image_size: 2048  # Max dimension (width/height) for image compression
+
+# =============================================================================
+# Vector Store Configuration
+# =============================================================================
+vector_store:
+  provider: "chroma"  # Options: chroma, qdrant, pinecone
+  persist_directory: "./data/db/chroma"
+  collection_name: "knowledge_hub"
+
+# =============================================================================
+# Retrieval Configuration
+# =============================================================================
+retrieval:
+  dense_top_k: 20
+  sparse_top_k: 20
+  fusion_top_k: 10
+  rrf_k: 60  # RRF constant
+
+# =============================================================================
+# Rerank Configuration
+# =============================================================================
+rerank:
+  enabled: true
+  provider: "llm"  # Options: none, cross_encoder, llm
+  model: "gpt-4o"
+  top_k: 5
+
+# =============================================================================
+# Evaluation Configuration
+# =============================================================================
+evaluation:
+  enabled: false
+  provider: "custom"  # Options: ragas, deepeval, custom
+  metrics:
+    - "hit_rate"
+    - "mrr"
+    - "faithfulness"
+
+# =============================================================================
+# Observability Configuration
+# =============================================================================
+observability:
+  log_level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  trace_enabled: true
+  trace_file: "./logs/traces.jsonl"
+  structured_logging: true
+
+# =============================================================================
+# Ingestion Configuration
+# =============================================================================
+ingestion:
+  chunk_size: 1000
+  chunk_overlap: 200
+  splitter: "recursive"  # Options: recursive, semantic, fixed_length
+  batch_size: 100
+  
+  # Chunk Refiner Configuration (C5)
+  chunk_refiner:
+    use_llm: true  # Set to true to enable LLM-based refinement (requires LLM config)
+    # When use_llm is false or LLM call fails, falls back to rule-based refinement
+  
+  # Metadata Enricher Configuration (C6)
+  metadata_enricher:
+    use_llm: true  # Set to true to enable LLM-based enrichment (requires LLM config)
+    # When use_llm is false or LLM call fails, falls back to rule-based enrichment
